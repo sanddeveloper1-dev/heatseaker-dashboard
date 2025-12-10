@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '@/components/api/apiClient';
-import { base44 } from '@/api/base44Client';
 import JsonViewer from '@/components/common/JsonViewer';
 import { motion, AnimatePresence } from 'framer-motion';
 import {

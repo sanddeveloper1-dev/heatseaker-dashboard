@@ -16,9 +16,9 @@ export default function TopNav({ onMobileMenuToggle, pageTitle }) {
 
 	const handleLogout = () => {
 		logout();
-		// Use base44's built-in logout
+		// Redirect to login page after logout
 		if (typeof window !== 'undefined') {
-			window.location.reload();
+			window.location.href = '/Login';
 		}
 	};
 

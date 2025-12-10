@@ -118,7 +118,7 @@ npm test
 
 - Some TypeScript errors need to be resolved for production build
 - Login page component is missing (referenced but not implemented)
-- Base44 client is a placeholder (needs actual SDK integration)
+- Custom authentication implementation (no external dependencies)
 
 ## Testing
 
