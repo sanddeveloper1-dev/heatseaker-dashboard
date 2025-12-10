@@ -18,6 +18,9 @@ build/
 .env.test.local
 .env.production.local
 
+# Package manager lock files (keep yarn.lock, ignore npm)
+package-lock.json
+
 # Logs
 npm-debug.log*
 yarn-debug.log*

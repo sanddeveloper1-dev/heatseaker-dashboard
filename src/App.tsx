@@ -12,7 +12,7 @@ import Documentation from './pages/Documentation';
 function AppRoutes() {
   const location = useLocation();
   const navigate = useNavigate();
-  
+
   // Extract page name from path
   const getPageName = () => {
     const path = location.pathname;
