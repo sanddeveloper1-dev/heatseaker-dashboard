@@ -1,13 +1,27 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 
-const AuthContext = createContext(null);
+interface User {
+	username?: string;
+	[key: string]: any;
+}
+
+interface AuthContextType {
+	token: string | null;
+	user: User | null;
+	isAuthenticated: boolean;
+	isLoading: boolean;
+	login: (newToken: string, userData: User | null) => void;
+	logout: () => void;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 const TOKEN_KEY = 'heatseaker_admin_token';
 const USER_KEY = 'heatseaker_admin_user';
 
-export function AuthProvider({ children }) {
-	const [token, setToken] = useState(null);
-	const [user, setUser] = useState(null);
+export function AuthProvider({ children }: { children: ReactNode }) {
+	const [token, setToken] = useState<string | null>(null);
+	const [user, setUser] = useState<User | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	useEffect(() => {
@@ -28,7 +42,7 @@ export function AuthProvider({ children }) {
 		setIsLoading(false);
 	}, []);
 
-	const login = useCallback((newToken, userData) => {
+	const login = useCallback((newToken: string, userData: User | null) => {
 		setToken(newToken);
 		setUser(userData);
 		localStorage.setItem(TOKEN_KEY, newToken);
@@ -60,7 +74,7 @@ export function AuthProvider({ children }) {
 	);
 }
 
-export function useAuth() {
+export function useAuth(): AuthContextType {
 	const context = useContext(AuthContext);
 	if (!context) {
 		throw new Error('useAuth must be used within an AuthProvider');

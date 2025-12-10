@@ -1,7 +1,7 @@
 // API Client configuration
 // This module provides a configured fetch wrapper for API calls
 
-const API_BASE_URL = 'http://localhost:8080'; // Default, can be overridden
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'; // Can be overridden via .env
 
 const TOKEN_KEY = 'heatseaker_admin_token';
 
@@ -23,12 +23,12 @@ function handleAuthError() {
 }
 
 // Main API request function
-export async function apiRequest(endpoint, options = {}) {
+export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const token = getToken();
   
-  const headers = {
+  const headers: HeadersInit = {
     'Content-Type': 'application/json',
-    ...options.headers,
+    ...(options.headers || {}),
   };
 
   if (token) {
@@ -61,7 +61,7 @@ export async function apiRequest(endpoint, options = {}) {
   }
 
   if (!response.ok) {
-    const error = new Error(data.message || data.error || 'API request failed');
+    const error: any = new Error(data.message || data.error || 'API request failed');
     error.status = response.status;
     error.data = data;
     throw error;
@@ -72,29 +72,29 @@ export async function apiRequest(endpoint, options = {}) {
 
 // Convenience methods
 export const api = {
-  get: (endpoint, options = {}) => 
+  get: (endpoint: string, options: RequestInit = {}) => 
     apiRequest(endpoint, { ...options, method: 'GET' }),
   
-  post: (endpoint, body, options = {}) => 
+  post: (endpoint: string, body: any, options: RequestInit = {}) => 
     apiRequest(endpoint, { 
       ...options, 
       method: 'POST', 
       body: JSON.stringify(body) 
     }),
   
-  put: (endpoint, body, options = {}) => 
+  put: (endpoint: string, body: any, options: RequestInit = {}) => 
     apiRequest(endpoint, { 
       ...options, 
       method: 'PUT', 
       body: JSON.stringify(body) 
     }),
   
-  delete: (endpoint, options = {}) => 
+  delete: (endpoint: string, options: RequestInit = {}) => 
     apiRequest(endpoint, { ...options, method: 'DELETE' }),
 };
 
 // Auth specific functions
-export async function loginApi(username, password) {
+export async function loginApi(username: string, password: string) {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
     method: 'POST',
     headers: {

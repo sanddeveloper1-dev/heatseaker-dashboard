@@ -1,8 +1,21 @@
-import React, { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react';
+import { X, CheckCircle, AlertCircle, AlertTriangle, Info, LucideIcon } from 'lucide-react';
 
-const ToastContext = createContext({
+interface Toast {
+	id: number;
+	message: string;
+	type: 'success' | 'error' | 'warning' | 'info';
+}
+
+interface ToastContextType {
+	success: (msg: string) => void;
+	error: (msg: string) => void;
+	warning: (msg: string) => void;
+	info: (msg: string) => void;
+}
+
+const ToastContext = createContext<ToastContextType>({
 	success: () => { },
 	error: () => { },
 	warning: () => { },
@@ -30,10 +43,10 @@ const iconColors = {
 	info: 'text-blue-500',
 };
 
-export function ToastProvider({ children }) {
-	const [toasts, setToasts] = useState([]);
+export function ToastProvider({ children }: { children: ReactNode }) {
+	const [toasts, setToasts] = useState<Toast[]>([]);
 
-	const addToast = useCallback((message, type = 'info', duration = 5000) => {
+	const addToast = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', duration = 5000) => {
 		const id = Date.now();
 		setToasts(prev => [...prev, { id, message, type }]);
 
@@ -44,15 +57,15 @@ export function ToastProvider({ children }) {
 		}
 	}, []);
 
-	const removeToast = useCallback((id) => {
+	const removeToast = useCallback((id: number) => {
 		setToasts(prev => prev.filter(t => t.id !== id));
 	}, []);
 
-	const toast = {
-		success: (msg) => addToast(msg, 'success'),
-		error: (msg) => addToast(msg, 'error'),
-		warning: (msg) => addToast(msg, 'warning'),
-		info: (msg) => addToast(msg, 'info'),
+	const toast: ToastContextType = {
+		success: (msg: string) => addToast(msg, 'success'),
+		error: (msg: string) => addToast(msg, 'error'),
+		warning: (msg: string) => addToast(msg, 'warning'),
+		info: (msg: string) => addToast(msg, 'info'),
 	};
 
 	return (
@@ -61,7 +74,7 @@ export function ToastProvider({ children }) {
 			<div className="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
 				<AnimatePresence>
 					{toasts.map(t => {
-						const Icon = icons[t.type];
+						const Icon: LucideIcon = icons[t.type];
 						return (
 							<motion.div
 								key={t.id}

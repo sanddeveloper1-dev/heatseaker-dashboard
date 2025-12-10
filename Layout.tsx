@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthProvider, useAuth } from '@/components/auth/AuthContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import Sidebar from '@/components/layout/Sidebar';
-import TopNav from '@/components/layout/TopNav';
+import TopNav from '@/components/layout/TopNat';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 
