@@ -97,7 +97,7 @@ export default function Statistics() {
 	const [dateRange, setDateRange] = useState('7');
 	const [customStart, setCustomStart] = useState('');
 	const [customEnd, setCustomEnd] = useState('');
-	const [stats, setStats] = useState({});
+	const [stats, setStats] = useState<Record<string, any>>({});
 	const [chartData, setChartData] = useState(sampleRaceData);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -134,7 +134,7 @@ export default function Statistics() {
 		fetchStats();
 	}, [dateRange, customStart, customEnd]);
 
-	const formatValue = (card, value) => {
+	const formatValue = (card: any, value: any) => {
 		if (!value || value === '—') return card.defaultValue;
 		if (card.isDate) {
 			return new Date(value).toLocaleString();

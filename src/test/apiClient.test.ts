@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { api } from '@/components/api/apiClient';
 
 // Mock fetch
-global.fetch = vi.fn();
+(globalThis as any).fetch = vi.fn();
 
 describe('apiClient', () => {
   beforeEach(() => {

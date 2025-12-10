@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import type { JsonViewerProps } from '@/types';
 
-function JsonNode({ data, depth = 0, initialExpanded = true }) {
+function JsonNode({ data, depth = 0, initialExpanded = true }: { data: any; depth?: number; initialExpanded?: boolean }) {
 	const [isExpanded, setIsExpanded] = useState(initialExpanded && depth < 2);
 
 	if (data === null) {
@@ -94,7 +95,7 @@ function JsonNode({ data, depth = 0, initialExpanded = true }) {
 	return <span className="text-slate-600">{String(data)}</span>;
 }
 
-export default function JsonViewer({ data, title, className = '' }) {
+export default function JsonViewer({ data, title, className = '' }: JsonViewerProps) {
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = async () => {

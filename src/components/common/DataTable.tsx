@@ -3,8 +3,9 @@ import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import type { DataTableProps } from '@/types';
 
-export default function DataTable({
+export default function DataTable<T = any>({
 	columns,
 	data,
 	isLoading,
@@ -12,7 +13,7 @@ export default function DataTable({
 	emptyMessage = 'No data available',
 	pagination,
 	className = '',
-}) {
+}: DataTableProps<T>) {
 	if (isLoading) {
 		return (
 			<div className={`rounded-xl border border-slate-200 overflow-hidden ${className}`}>
@@ -20,7 +21,7 @@ export default function DataTable({
 					<table className="w-full">
 						<thead className="bg-slate-50 border-b border-slate-200">
 							<tr>
-								{columns.map((col, i) => (
+								{columns.map((col: any, i: number) => (
 									<th key={i} className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
 										{col.header}
 									</th>
@@ -28,9 +29,9 @@ export default function DataTable({
 							</tr>
 						</thead>
 						<tbody className="divide-y divide-slate-100 bg-white">
-							{[...Array(5)].map((_, i) => (
+							{[...Array(5)].map((_: any, i: number) => (
 								<tr key={i}>
-									{columns.map((_, j) => (
+									{columns.map((_: any, j: number) => (
 										<td key={j} className="px-4 py-3">
 											<Skeleton className="h-5 w-full" />
 										</td>
@@ -58,7 +59,7 @@ export default function DataTable({
 				<table className="w-full">
 					<thead className="bg-slate-50 border-b border-slate-200">
 						<tr>
-							{columns.map((col, i) => (
+							{columns.map((col: any, i: number) => (
 								<th
 									key={i}
 									className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider"
@@ -70,9 +71,9 @@ export default function DataTable({
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-slate-100 bg-white">
-						{data.map((row, rowIndex) => (
+						{data.map((row: T, rowIndex: number) => (
 							<motion.tr
-								key={row.id || rowIndex}
+								key={(row as any).id || rowIndex}
 								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
 								transition={{ delay: rowIndex * 0.02 }}
@@ -82,9 +83,9 @@ export default function DataTable({
                   transition-colors
                 `}
 							>
-								{columns.map((col, colIndex) => (
+								{columns.map((col: any, colIndex: number) => (
 									<td key={colIndex} className="px-4 py-3 text-sm text-slate-700">
-										{col.render ? col.render(row[col.accessor], row) : row[col.accessor]}
+										{col.render ? col.render((row as any)[col.accessor], row) : (row as any)[col.accessor]}
 									</td>
 								))}
 							</motion.tr>

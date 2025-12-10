@@ -16,7 +16,9 @@ const pageTitles = {
 	Documentation: 'Documentation',
 };
 
-function AuthenticatedLayout({ children, currentPageName }) {
+import type { LayoutProps } from '@/types';
+
+function AuthenticatedLayout({ children, currentPageName }: LayoutProps) {
 	const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -97,7 +99,7 @@ function AuthenticatedLayout({ children, currentPageName }) {
 	);
 }
 
-export default function Layout({ children, currentPageName }) {
+export default function Layout({ children, currentPageName }: LayoutProps) {
 	return (
 		<ToastProvider>
 			<AuthenticatedLayout currentPageName={currentPageName}>

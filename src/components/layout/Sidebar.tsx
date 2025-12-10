@@ -22,7 +22,9 @@ const navItems = [
 	{ name: 'Documentation', icon: BookOpen, page: 'Documentation' },
 ];
 
-export default function Sidebar({ currentPage, isCollapsed, onToggle }) {
+import type { SidebarProps } from '@/types';
+
+export default function Sidebar({ currentPage, isCollapsed, onToggle }: SidebarProps) {
 	return (
 		<motion.aside
 			initial={false}

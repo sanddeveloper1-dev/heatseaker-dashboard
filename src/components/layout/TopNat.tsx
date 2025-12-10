@@ -10,7 +10,9 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
-export default function TopNav({ onMobileMenuToggle, pageTitle }) {
+import type { TopNavProps } from '@/types';
+
+export default function TopNav({ onMobileMenuToggle, pageTitle }: TopNavProps) {
 
 	return (
 		<header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
