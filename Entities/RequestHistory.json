@@ -1,0 +1,35 @@
+{
+  "name": "RequestHistory",
+  "type": "object",
+  "properties": {
+    "method": {
+      "type": "string",
+      "enum": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ]
+    },
+    "path": {
+      "type": "string"
+    },
+    "payload": {
+      "type": "object"
+    },
+    "response": {
+      "type": "object"
+    },
+    "status": {
+      "type": "number"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "method",
+    "path"
+  ]
+}

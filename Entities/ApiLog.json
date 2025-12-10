@@ -1,0 +1,31 @@
+{
+  "name": "ApiLog",
+  "type": "object",
+  "properties": {
+    "level": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warn",
+        "error"
+      ],
+      "description": "Log level"
+    },
+    "message": {
+      "type": "string",
+      "description": "Log message"
+    },
+    "context": {
+      "type": "object",
+      "description": "Additional context data"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "level",
+    "message"
+  ]
+}
