@@ -1,8 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { ToastProvider } from '@/components/ui/Toast';
 import Sidebar from '@/components/layout/Sidebar';
 import TopNav from '@/components/layout/TopNat';
-import LoadingSpinner from '@/components/common/LoadingSpinner';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Page title mapping

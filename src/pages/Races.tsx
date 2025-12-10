@@ -1,16 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/utils';
 import { api } from '@/components/api/apiClient';
 import DataTable from '@/components/common/DataTable';
-import { motion } from 'framer-motion';
 import {
-	Search,
-	Filter,
 	RefreshCw,
 	Trophy,
-	Eye,
-	Calendar
+	Eye
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

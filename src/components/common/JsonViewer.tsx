@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronDown, ChevronRight, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import type { JsonViewerProps } from '@/types';

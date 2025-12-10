@@ -1,5 +1,4 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Layout from './layouts/Layout';
 import Dashboard from './pages/Dashboard';
 import Logs from './pages/Logs';
@@ -11,7 +10,6 @@ import Documentation from './pages/Documentation';
 
 function AppRoutes() {
   const location = useLocation();
-  const navigate = useNavigate();
 
   // Extract page name from path
   const getPageName = () => {

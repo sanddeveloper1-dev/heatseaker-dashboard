@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '@/components/api/apiClient';
 import StatusCard from '@/components/common/StatusCard';
 import { motion } from 'framer-motion';

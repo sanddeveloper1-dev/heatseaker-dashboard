@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '@/components/api/apiClient';
 import JsonViewer from '@/components/common/JsonViewer';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import {
 	Send,
 	Clock,
 	Trash2,
 	ChevronRight,
-	Play,
-	FileJson
+	Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -480,12 +479,6 @@ export default function ApiTest() {
 			} catch (e) { }
 		}
 	}, []);
-
-	const addToHistory = (item: RequestHistoryItem) => {
-		const newHistory = [{ ...item, timestamp: new Date().toISOString() }, ...history].slice(0, 20);
-		setHistory(newHistory);
-		localStorage.setItem('api_test_history', JSON.stringify(newHistory));
-	};
 
 	const clearHistory = () => {
 		setHistory([]);

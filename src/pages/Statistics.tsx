@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { api } from '@/components/api/apiClient';
 import { motion } from 'framer-motion';
 import {
@@ -98,7 +98,7 @@ export default function Statistics() {
 	const [customStart, setCustomStart] = useState('');
 	const [customEnd, setCustomEnd] = useState('');
 	const [stats, setStats] = useState<Record<string, any>>({});
-	const [chartData, setChartData] = useState(sampleRaceData);
+	const [chartData] = useState(sampleRaceData);
 	const [isLoading, setIsLoading] = useState(false);
 
 	const fetchStats = async () => {

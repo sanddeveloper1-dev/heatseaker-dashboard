@@ -27,7 +27,6 @@ export interface SelectTriggerProps extends React.ButtonHTMLAttributes<HTMLButto
 }
 
 export function SelectTrigger({ className, children, ...props }: SelectTriggerProps) {
-  const context = React.useContext(SelectContext);
   const [isOpen, setIsOpen] = React.useState(false);
   const triggerRef = React.useRef<HTMLButtonElement>(null);
 
@@ -77,10 +76,6 @@ export interface SelectValueProps {
 
 export function SelectValue({ placeholder }: SelectValueProps) {
   const context = React.useContext(SelectContext);
-  const selectedItem = React.useMemo(() => {
-    // Find selected item from SelectContent
-    return null;
-  }, []);
 
   return <span>{context?.value || placeholder || 'Select...'}</span>;
 }
@@ -90,9 +85,6 @@ export interface SelectContentProps {
 }
 
 export function SelectContent({ children }: SelectContentProps) {
-  const context = React.useContext(SelectContext);
-  const [isOpen, setIsOpen] = React.useState(false);
-
   // This is a simplified version - in production, use a proper dropdown library
   return (
     <div className="absolute z-50 min-w-[8rem] overflow-hidden rounded-lg border border-slate-200 bg-white shadow-md">
@@ -108,7 +100,7 @@ export interface SelectItemProps {
 
 export function SelectItem({ value, children }: SelectItemProps) {
   const context = React.useContext(SelectContext);
-  
+
   return (
     <div
       className={cn(
