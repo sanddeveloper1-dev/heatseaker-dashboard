@@ -1,13 +1,13 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
-import Layout from '../Layout';
-import Dashboard from '../Pages/Dashboard';
-import Logs from '../Pages/Logs';
-import Statistics from '../Pages/Statistics';
-import ApiTest from '../Pages/ApiTest';
-import Races from '../Pages/Races';
-import RaceDetail from '../Pages/RaceDetail';
-import Documentation from '../Pages/Documentation';
+import Layout from './layouts/Layout';
+import Dashboard from './pages/Dashboard';
+import Logs from './pages/Logs';
+import Statistics from './pages/Statistics';
+import ApiTest from './pages/ApiTest';
+import Races from './pages/Races';
+import RaceDetail from './pages/RaceDetail';
+import Documentation from './pages/Documentation';
 
 function AppRoutes() {
   const location = useLocation();

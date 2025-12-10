@@ -30,22 +30,6 @@ describe('API Contracts', () => {
     });
   });
 
-  describe('Auth Endpoints', () => {
-    it('should define POST /api/auth/login contract', () => {
-      const request = {
-        username: expect.any(String),
-        password: expect.any(String),
-      };
-      const response = {
-        success: expect.any(Boolean),
-        token: expect.any(String),
-        user: expect.any(Object),
-      };
-      expect(request).toBeDefined();
-      expect(response).toBeDefined();
-    });
-  });
-
   describe('Race Endpoints', () => {
     it('should define GET /api/races contract', () => {
       const queryParams = {

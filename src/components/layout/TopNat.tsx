@@ -1,7 +1,6 @@
 import React from 'react';
-import { useAuth } from '../auth/AuthContext';
 import { useToast } from '../ui/Toast';
-import { LogOut, User, Menu } from 'lucide-react';
+import { User, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -12,15 +11,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 export default function TopNav({ onMobileMenuToggle, pageTitle }) {
-	const { user, logout } = useAuth();
-
-	const handleLogout = () => {
-		logout();
-		// Redirect to login page after logout
-		if (typeof window !== 'undefined') {
-			window.location.href = '/Login';
-		}
-	};
 
 	return (
 		<header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-30">
@@ -44,20 +34,15 @@ export default function TopNav({ onMobileMenuToggle, pageTitle }) {
 								<User className="w-4 h-4 text-white" />
 							</div>
 							<span className="hidden sm:inline text-sm font-medium text-slate-700">
-								{user?.username || 'Admin'}
+								Admin
 							</span>
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-48">
 						<div className="px-2 py-1.5">
-							<p className="text-sm font-medium">{user?.username || 'Admin'}</p>
+							<p className="text-sm font-medium">Admin</p>
 							<p className="text-xs text-slate-500">Administrator</p>
 						</div>
-						<DropdownMenuSeparator />
-						<DropdownMenuItem onClick={handleLogout} className="text-rose-600 cursor-pointer">
-							<LogOut className="w-4 h-4 mr-2" />
-							Sign out
-						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>

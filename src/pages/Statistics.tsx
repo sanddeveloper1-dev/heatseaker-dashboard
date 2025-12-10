@@ -104,14 +104,27 @@ export default function Statistics() {
 	const fetchStats = async () => {
 		setIsLoading(true);
 		try {
-			// This would fetch from a stats endpoint when available
-			// const data = await api.get('/api/stats');
-			// setStats(data);
+			const params = new URLSearchParams();
+			if (dateRange === 'custom' && customStart) {
+				params.append('startDate', customStart);
+			} else if (dateRange !== 'custom' && dateRange !== '1') {
+				const end = new Date();
+				const start = new Date();
+				start.setDate(start.getDate() - parseInt(dateRange));
+				params.append('startDate', start.toISOString().split('T')[0]);
+				params.append('endDate', end.toISOString().split('T')[0]);
+			}
+			if (dateRange === 'custom' && customEnd) {
+				params.append('endDate', customEnd);
+			}
 
-			// For now, using placeholder
-			setStats({});
+			const queryString = params.toString();
+			const url = queryString ? `/api/stats?${queryString}` : '/api/stats';
+			const data = await api.get(url);
+			setStats(data);
 		} catch (error) {
 			console.error('Failed to fetch stats:', error);
+			setStats({});
 		} finally {
 			setIsLoading(false);
 		}

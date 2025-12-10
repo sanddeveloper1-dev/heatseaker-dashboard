@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { AuthProvider, useAuth } from '@/components/auth/AuthContext';
 import { ToastProvider } from '@/components/ui/Toast';
 import Sidebar from '@/components/layout/Sidebar';
 import TopNav from '@/components/layout/TopNat';
@@ -100,12 +99,10 @@ function AuthenticatedLayout({ children, currentPageName }) {
 
 export default function Layout({ children, currentPageName }) {
 	return (
-		<AuthProvider>
-			<ToastProvider>
-				<AuthenticatedLayout currentPageName={currentPageName}>
-					{children}
-				</AuthenticatedLayout>
-			</ToastProvider>
-		</AuthProvider>
+		<ToastProvider>
+			<AuthenticatedLayout currentPageName={currentPageName}>
+				{children}
+			</AuthenticatedLayout>
+		</ToastProvider>
 	);
 }

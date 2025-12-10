@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { api, loginApi } from '../../Components/api/apiClient';
+import { api } from '@/components/api/apiClient';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -39,8 +39,8 @@ describe('apiClient', () => {
       expect(result).toEqual(mockResponse);
     });
 
-    it('should include authorization header when token exists', async () => {
-      localStorage.setItem('heatseaker_admin_token', 'test-token');
+    it('should include API key header when API key exists', async () => {
+      localStorage.setItem('heatseaker_api_key', 'test-api-key');
       (fetch as any).mockResolvedValueOnce({
         ok: true,
         status: 200,
@@ -55,7 +55,7 @@ describe('apiClient', () => {
         expect.any(String),
         expect.objectContaining({
           headers: expect.objectContaining({
-            Authorization: 'Bearer test-token',
+            'X-API-Key': 'test-api-key',
           }),
         })
       );
@@ -98,32 +98,4 @@ describe('apiClient', () => {
     });
   });
 
-  describe('loginApi', () => {
-    it('should make a login request', async () => {
-      const mockResponse = { success: true, token: 'token', user: {} };
-      (fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockResponse,
-      });
-
-      const result = await loginApi('user', 'pass');
-      expect(fetch).toHaveBeenCalledWith(
-        'http://localhost:8080/api/auth/login',
-        expect.objectContaining({
-          method: 'POST',
-          body: JSON.stringify({ username: 'user', password: 'pass' }),
-        })
-      );
-      expect(result).toEqual(mockResponse);
-    });
-
-    it('should throw error on failed login', async () => {
-      (fetch as any).mockResolvedValueOnce({
-        ok: false,
-        json: async () => ({ success: false, message: 'Invalid credentials' }),
-      });
-
-      await expect(loginApi('user', 'pass')).rejects.toThrow();
-    });
-  });
 });

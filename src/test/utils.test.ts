@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createPageUrl, cn } from '../../utils';
+import { createPageUrl, cn } from '@/utils/utils';
 
 describe('utils', () => {
   describe('createPageUrl', () => {

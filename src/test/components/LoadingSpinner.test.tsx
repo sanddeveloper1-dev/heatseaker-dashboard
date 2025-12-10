@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
-import LoadingSpinner from '../../../Components/common/LoadingSpinner';
+import LoadingSpinner from '@/components/common/LoadingSpinner';
 
 describe('LoadingSpinner', () => {
   it('should render with default size', () => {
