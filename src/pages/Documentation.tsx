@@ -9,11 +9,17 @@ import JsonViewer from '@/components/common/JsonViewer';
 import { FileText, Database, BookOpen, Download, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
 
+interface DocumentationState {
+	swagger: boolean;
+	schemas: boolean;
+	readme: boolean;
+}
+
 export default function Documentation() {
-	const [swaggerDoc, setSwaggerDoc] = useState(null);
-	const [schemas, setSchemas] = useState(null);
-	const [readme, setReadme] = useState(null);
-	const [loading, setLoading] = useState({ swagger: false, schemas: false, readme: false });
+	const [swaggerDoc, setSwaggerDoc] = useState<any>(null);
+	const [schemas, setSchemas] = useState<any>(null);
+	const [readme, setReadme] = useState<string | null>(null);
+	const [loading, setLoading] = useState<DocumentationState>({ swagger: false, schemas: false, readme: false });
 	const [customEndpoint, setCustomEndpoint] = useState('');
 
 	const fetchSwaggerDocs = async (endpoint = '/swagger.json') => {
@@ -21,7 +27,7 @@ export default function Documentation() {
 		try {
 			const data = await api.get(endpoint);
 			setSwaggerDoc(data);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Failed to fetch Swagger docs:', error);
 			setSwaggerDoc({ error: error.message || 'Failed to fetch Swagger documentation' });
 		} finally {
@@ -34,7 +40,7 @@ export default function Documentation() {
 		try {
 			const data = await api.get(endpoint);
 			setSchemas(data);
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Failed to fetch schemas:', error);
 			setSchemas({ error: error.message || 'Failed to fetch schemas' });
 		} finally {
@@ -47,7 +53,7 @@ export default function Documentation() {
 		try {
 			const data = await api.get(endpoint);
 			setReadme(typeof data === 'string' ? data : JSON.stringify(data, null, 2));
-		} catch (error) {
+		} catch (error: any) {
 			console.error('Failed to fetch README:', error);
 			setReadme(`Error: ${error.message || 'Failed to fetch README'}`);
 		} finally {
@@ -55,7 +61,7 @@ export default function Documentation() {
 		}
 	};
 
-	const downloadAsJson = (data, filename) => {
+	const downloadAsJson = (data: any, filename: string) => {
 		const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
 		const url = URL.createObjectURL(blob);
 		const a = document.createElement('a');

@@ -25,9 +25,16 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import type { BetSubmissionRequest, BetSubmissionResponse, RaceDailyResponse } from '@/types';
 
 const BET_TYPES = ['WIN', 'PLACE', 'SHOW', 'EXACTA'];
-const COMBO_TYPES = ['BOX', 'STRAIGHT', 'WHEEL'];
+const COMBO_TYPES = ['BOX', 'STRAIGHT', 'WHEEL', 'KEY', 'KEY-BOX', 'POWER-BOX'];
+
+interface ApiTestResponse {
+	success: boolean;
+	data?: any;
+	error?: string;
+}
 
 function BettingTab() {
 	const [betType, setBetType] = useState('WIN');
@@ -38,25 +45,34 @@ function BettingTab() {
 	const [betAmount, setBetAmount] = useState('');
 	const [comboType, setComboType] = useState('STRAIGHT');
 	const [isLoading, setIsLoading] = useState(false);
-	const [request, setRequest] = useState(null);
-	const [response, setResponse] = useState(null);
+	const [request, setRequest] = useState<BetSubmissionRequest | null>(null);
+	const [response, setResponse] = useState<ApiTestResponse | null>(null);
 
-	const buildPayload = () => {
-		const payload = {
-			betType,
+	const buildPayload = (): BetSubmissionRequest => {
+		const bet: any = {
 			trackCode,
 			raceNumber: parseInt(raceNumber),
-			amount: parseFloat(betAmount),
+			betType,
+			betAmount: betAmount || '0.00',
 		};
 
 		if (betType === 'EXACTA') {
-			payload.combination = betCombination.split(',').map(n => n.trim());
-			payload.comboType = comboType;
+			// Convert comma-separated to dash-separated format (e.g., "3,5" -> "3-5")
+			const combination = betCombination.split(',').map(n => n.trim()).join('-');
+			if (combination) {
+				bet.betCombination = combination;
+			}
+			if (comboType) {
+				bet.comboType = comboType;
+			}
 		} else {
-			payload.horseNumber = parseInt(horseNumber);
+			bet.horseNumber = horseNumber ? (isNaN(Number(horseNumber)) ? horseNumber : Number(horseNumber)) : undefined;
 		}
 
-		return payload;
+		return {
+			bets: [bet],
+			betType,
+		};
 	};
 
 	const handleSubmit = async () => {
@@ -66,10 +82,10 @@ function BettingTab() {
 		setResponse(null);
 
 		try {
-			const data = await api.post('/api/submit-bets', payload);
-			setResponse({ success: true, data });
-		} catch (error) {
-			setResponse({ success: false, error: error.message, data: error.data });
+			const data = await api.post<BetSubmissionResponse>('/api/submit-bets', payload);
+			setResponse({ success: data.success || true, data });
+		} catch (error: any) {
+			setResponse({ success: false, error: error.message || 'Request failed', data: error.data });
 		} finally {
 			setIsLoading(false);
 		}
@@ -193,15 +209,15 @@ function BettingTab() {
 function RaceDataTab() {
 	const [jsonPayload, setJsonPayload] = useState('{\n  "date": "2024-01-15",\n  "track": "SA"\n}');
 	const [isLoading, setIsLoading] = useState(false);
-	const [response, setResponse] = useState(null);
+	const [response, setResponse] = useState<ApiTestResponse | null>(null);
 	const [jsonError, setJsonError] = useState('');
 
-	const validateJson = (text) => {
+	const validateJson = (text: string): boolean => {
 		try {
 			JSON.parse(text);
 			setJsonError('');
 			return true;
-		} catch (e) {
+		} catch (e: any) {
 			setJsonError(e.message);
 			return false;
 		}
@@ -217,10 +233,10 @@ function RaceDataTab() {
 		setResponse(null);
 
 		try {
-			const data = await api.post('/api/races/daily', JSON.parse(jsonPayload));
-			setResponse({ success: true, data });
-		} catch (error) {
-			setResponse({ success: false, error: error.message, data: error.data });
+			const data = await api.post<RaceDailyResponse>('/api/races/daily', JSON.parse(jsonPayload));
+			setResponse({ success: data.success || true, data });
+		} catch (error: any) {
+			setResponse({ success: false, error: error.message || 'Request failed', data: error.data });
 		} finally {
 			setIsLoading(false);
 		}
@@ -279,7 +295,7 @@ function QueryTab() {
 	const [trackCode, setTrackCode] = useState('');
 	const [date, setDate] = useState('');
 	const [isLoading, setIsLoading] = useState(false);
-	const [response, setResponse] = useState(null);
+	const [response, setResponse] = useState<ApiTestResponse | null>(null);
 	const [builtUrl, setBuiltUrl] = useState('');
 
 	const endpoints = [
@@ -312,10 +328,10 @@ function QueryTab() {
 		setResponse(null);
 
 		try {
-			const data = await api.get(builtUrl);
-			setResponse({ success: true, data });
-		} catch (error) {
-			setResponse({ success: false, error: error.message, data: error.data });
+			const data = await api.get<any>(builtUrl);
+			setResponse({ success: (data as any).success !== false, data });
+		} catch (error: any) {
+			setResponse({ success: false, error: error.message || 'Request failed', data: error.data });
 		} finally {
 			setIsLoading(false);
 		}
@@ -405,7 +421,13 @@ function QueryTab() {
 	);
 }
 
-function RequestHistory({ history, onSelect, onClear }) {
+interface RequestHistoryItem {
+	method: string;
+	path: string;
+	timestamp: string;
+}
+
+function RequestHistory({ history, onSelect, onClear }: { history: RequestHistoryItem[]; onSelect: (item: RequestHistoryItem) => void; onClear: () => void }) {
 	if (history.length === 0) {
 		return (
 			<div className="text-center py-8 text-slate-400">
@@ -424,7 +446,7 @@ function RequestHistory({ history, onSelect, onClear }) {
 				</Button>
 			</div>
 			<ScrollArea className="h-64">
-				{history.map((item, index) => (
+				{history.map((item: RequestHistoryItem, index: number) => (
 					<motion.div
 						key={index}
 						initial={{ opacity: 0, x: -10 }}
@@ -448,7 +470,7 @@ function RequestHistory({ history, onSelect, onClear }) {
 }
 
 export default function ApiTest() {
-	const [history, setHistory] = useState([]);
+	const [history, setHistory] = useState<RequestHistoryItem[]>([]);
 
 	useEffect(() => {
 		const saved = localStorage.getItem('api_test_history');
@@ -459,7 +481,7 @@ export default function ApiTest() {
 		}
 	}, []);
 
-	const addToHistory = (item) => {
+	const addToHistory = (item: RequestHistoryItem) => {
 		const newHistory = [{ ...item, timestamp: new Date().toISOString() }, ...history].slice(0, 20);
 		setHistory(newHistory);
 		localStorage.setItem('api_test_history', JSON.stringify(newHistory));
@@ -508,7 +530,7 @@ export default function ApiTest() {
 						<CardContent className="p-4">
 							<RequestHistory
 								history={history}
-								onSelect={(item) => console.log('Selected:', item)}
+								onSelect={(item: RequestHistoryItem) => console.log('Selected:', item)}
 								onClear={clearHistory}
 							/>
 						</CardContent>

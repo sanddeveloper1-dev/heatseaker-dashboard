@@ -79,7 +79,7 @@ function AuthenticatedLayout({ children, currentPageName }) {
 			>
 				<TopNav
 					onMobileMenuToggle={() => setMobileMenuOpen(!mobileMenuOpen)}
-					pageTitle={pageTitles[currentPageName] || currentPageName}
+					pageTitle={(pageTitles as Record<string, string>)[currentPageName] || currentPageName}
 				/>
 
 				<main className="p-6">

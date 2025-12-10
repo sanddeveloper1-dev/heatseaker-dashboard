@@ -26,10 +26,11 @@ import {
 	TableHeader,
 	TableRow,
 } from '@/components/ui/table';
+import type { RaceDetailResponse, RaceWinnerResponse, Race, RaceEntry, RaceWinner } from '@/types';
 
 export default function RaceDetail() {
-	const [race, setRace] = useState(null);
-	const [winner, setWinner] = useState(null);
+	const [race, setRace] = useState<(Race & { entries?: RaceEntry[] }) | null>(null);
+	const [winner, setWinner] = useState<RaceWinner | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 
 	const urlParams = new URLSearchParams(window.location.search);
@@ -43,13 +44,17 @@ export default function RaceDetail() {
 
 		setIsLoading(true);
 		try {
-			const [raceData, winnerData] = await Promise.all([
-				api.get(`/api/races/${raceId}`),
-				api.get(`/api/races/${raceId}/winner`).catch(() => null),
+			const [raceResponse, winnerResponse] = await Promise.all([
+				api.get<RaceDetailResponse>(`/api/races/${raceId}`),
+				api.get<RaceWinnerResponse>(`/api/races/${raceId}/winner`).catch(() => null),
 			]);
 
-			setRace(raceData);
-			setWinner(winnerData);
+			if (raceResponse.success) {
+				setRace({ ...raceResponse.race, entries: raceResponse.entries });
+			}
+			if (winnerResponse && winnerResponse.success) {
+				setWinner(winnerResponse.winner);
+			}
 		} catch (error) {
 			console.error('Failed to fetch race details:', error);
 		} finally {
@@ -126,7 +131,7 @@ export default function RaceDetail() {
 								<div>
 									<p className="text-xs text-slate-500">Track</p>
 									<p className="font-semibold text-slate-800">
-										{race.trackCode || race.trackName || '—'}
+										{race.trackCode || race.trackName || race.track_name || '—'}
 									</p>
 								</div>
 							</div>
@@ -148,7 +153,7 @@ export default function RaceDetail() {
 								<div>
 									<p className="text-xs text-slate-500">Race Number</p>
 									<p className="font-semibold text-slate-800">
-										R{race.raceNumber || '—'}
+										R{race.raceNumber || race.race_number || '—'}
 									</p>
 								</div>
 							</div>
@@ -170,7 +175,7 @@ export default function RaceDetail() {
 								<div>
 									<p className="text-xs text-slate-500">Date</p>
 									<p className="font-semibold text-slate-800">
-										{race.date ? new Date(race.date).toLocaleDateString() : '—'}
+										{race.date ? new Date(race.date as string).toLocaleDateString() : '—'}
 									</p>
 								</div>
 							</div>
@@ -196,7 +201,7 @@ export default function RaceDetail() {
 											? 'bg-emerald-100 text-emerald-700 border-emerald-200'
 											: 'bg-amber-100 text-amber-700 border-amber-200'
 									}>
-										{race.status || 'Unknown'}
+										{race.status || 'Pending'}
 									</Badge>
 								</div>
 							</div>
@@ -219,24 +224,20 @@ export default function RaceDetail() {
 							<div className="p-4 rounded-lg bg-gradient-to-br from-amber-50 to-yellow-50 border border-amber-200">
 								<p className="text-sm text-amber-600 mb-1">Winner</p>
 								<p className="text-2xl font-bold text-amber-800">
-									#{winner.horseNumber || winner.winnerNumber || '—'}
+									#{winner.winning_horse_number || winner.horseNumber || winner.winnerNumber || '—'}
 								</p>
 								{winner.horseName && (
 									<p className="text-sm text-amber-600 mt-1">{winner.horseName}</p>
 								)}
 							</div>
-							{winner.payout && (
+							{(winner.winning_payout_2_dollar !== undefined || winner.payout) && (
 								<div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
 									<p className="text-sm text-slate-500 mb-1">Win Payout</p>
 									<p className="text-2xl font-bold text-slate-800">
-										${typeof winner.payout === 'number' ? winner.payout.toFixed(2) : winner.payout}
+										${winner.winning_payout_2_dollar !== undefined
+											? winner.winning_payout_2_dollar.toFixed(2)
+											: (typeof winner.payout === 'number' ? winner.payout.toFixed(2) : winner.payout || '—')}
 									</p>
-								</div>
-							)}
-							{winner.time && (
-								<div className="p-4 rounded-lg bg-slate-50 border border-slate-200">
-									<p className="text-sm text-slate-500 mb-1">Finish Time</p>
-									<p className="text-2xl font-bold text-slate-800">{winner.time}</p>
 								</div>
 							)}
 						</div>
@@ -266,19 +267,23 @@ export default function RaceDetail() {
 									</TableRow>
 								</TableHeader>
 								<TableBody>
-									{race.entries.map((entry, index) => (
-										<TableRow key={index} className={winner?.horseNumber === entry.number ? 'bg-amber-50' : ''}>
-											<TableCell>
-												<Badge variant={winner?.horseNumber === entry.number ? 'default' : 'outline'} className={winner?.horseNumber === entry.number ? 'bg-amber-500' : ''}>
-													#{entry.number || entry.horseNumber || index + 1}
-												</Badge>
-											</TableCell>
-											<TableCell className="font-medium">{entry.name || entry.horseName || '—'}</TableCell>
-											<TableCell>{entry.odds || '—'}</TableCell>
-											<TableCell>{entry.jockey || '—'}</TableCell>
-											<TableCell>{entry.trainer || '—'}</TableCell>
-										</TableRow>
-									))}
+									{race.entries.map((entry: RaceEntry, index: number) => {
+										const horseNum = entry.horse_number || entry.number || (entry as any).horseNumber || index + 1;
+										const isWinner = winner && (winner.winning_horse_number === entry.horse_number || (winner as any).horseNumber === entry.number || (winner as any).winnerNumber === entry.number);
+										return (
+											<TableRow key={entry.id || index} className={isWinner ? 'bg-amber-50' : ''}>
+												<TableCell>
+													<Badge variant={isWinner ? 'default' : 'outline'} className={isWinner ? 'bg-amber-500' : ''}>
+														#{horseNum}
+													</Badge>
+												</TableCell>
+												<TableCell className="font-medium">{entry.name || (entry as any).horseName || '—'}</TableCell>
+												<TableCell>{entry.odds || entry.ml || entry.live_odds || '—'}</TableCell>
+												<TableCell>{entry.jockey || '—'}</TableCell>
+												<TableCell>{entry.trainer || '—'}</TableCell>
+											</TableRow>
+										);
+									})}
 								</TableBody>
 							</Table>
 						</div>
@@ -292,7 +297,7 @@ export default function RaceDetail() {
 					<CardTitle className="text-lg">Raw Race Data</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<JsonViewer data={race} />
+					<JsonViewer data={race} title="Race Data" />
 				</CardContent>
 			</Card>
 		</div>

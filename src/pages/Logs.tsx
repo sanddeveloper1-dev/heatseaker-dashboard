@@ -26,14 +26,16 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import LoadingSpinner from '@/components/common/LoadingSpinner';
+import type { LogsResponse, LogEntry, LogLevel } from '@/types';
 
-const levelConfig = {
+const levelConfig: Record<string, { icon: typeof AlertCircle; color: string }> = {
 	error: { icon: AlertCircle, color: 'bg-rose-100 text-rose-700 border-rose-200' },
 	warn: { icon: AlertTriangle, color: 'bg-amber-100 text-amber-700 border-amber-200' },
 	info: { icon: Info, color: 'bg-blue-100 text-blue-700 border-blue-200' },
+	debug: { icon: Info, color: 'bg-slate-100 text-slate-700 border-slate-200' },
 };
 
-function LogEntry({ log, isExpanded, onToggle }) {
+function LogEntry({ log, isExpanded, onToggle }: { log: LogEntry; isExpanded: boolean; onToggle: () => void }) {
 	const config = levelConfig[log.level] || levelConfig.info;
 	const Icon = config.icon;
 
@@ -69,7 +71,7 @@ function LogEntry({ log, isExpanded, onToggle }) {
 				</div>
 
 				<span className="text-xs text-slate-400 flex-shrink-0 font-mono">
-					{new Date(log.timestamp || log.created_date).toLocaleTimeString()}
+					{new Date(log.timestamp || log.created_date || '').toLocaleTimeString()}
 				</span>
 			</div>
 
@@ -83,7 +85,7 @@ function LogEntry({ log, isExpanded, onToggle }) {
 					>
 						<div className="px-4 pb-4 ml-12">
 							<pre className="p-3 rounded-lg bg-slate-900 text-slate-100 text-xs overflow-x-auto">
-								{JSON.stringify(log.context, null, 2)}
+								{JSON.stringify(log.context || log.meta, null, 2)}
 							</pre>
 						</div>
 					</motion.div>
@@ -94,13 +96,13 @@ function LogEntry({ log, isExpanded, onToggle }) {
 }
 
 export default function Logs() {
-	const [logs, setLogs] = useState([]);
+	const [logs, setLogs] = useState<LogEntry[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [level, setLevel] = useState('all');
 	const [search, setSearch] = useState('');
 	const [autoRefresh, setAutoRefresh] = useState(false);
-	const [expandedLogs, setExpandedLogs] = useState(new Set());
-	const intervalRef = useRef(null);
+	const [expandedLogs, setExpandedLogs] = useState<Set<number>>(new Set());
+	const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
 	const fetchLogs = async () => {
 		try {
@@ -109,13 +111,13 @@ export default function Logs() {
 			if (search) params.append('search', search);
 			params.append('limit', '100');
 
-			const data = await api.get(`/api/logs?${params.toString()}`);
-			setLogs(Array.isArray(data) ? data : data.logs || []);
+			const data = await api.get<LogsResponse>(`/api/logs?${params.toString()}`);
+			setLogs(data.success ? data.logs : []);
 		} catch (error) {
 			// If logs endpoint doesn't exist, show sample data
 			setLogs([
-				{ id: 1, level: 'info', message: 'Logs endpoint not configured - showing sample data', timestamp: new Date().toISOString() },
-				{ id: 2, level: 'warn', message: 'Connect to backend /api/logs to see real logs', timestamp: new Date().toISOString() },
+				{ id: 1, level: 'info' as LogLevel, message: 'Logs endpoint not configured - showing sample data', timestamp: new Date().toISOString() },
+				{ id: 2, level: 'warn' as LogLevel, message: 'Connect to backend /api/logs to see real logs', timestamp: new Date().toISOString() },
 			]);
 		} finally {
 			setIsLoading(false);
@@ -141,7 +143,7 @@ export default function Logs() {
 		};
 	}, [autoRefresh, level, search]);
 
-	const handleSearch = (e) => {
+	const handleSearch = (e: React.FormEvent) => {
 		e.preventDefault();
 		fetchLogs();
 	};
@@ -156,7 +158,7 @@ export default function Logs() {
 		URL.revokeObjectURL(url);
 	};
 
-	const toggleExpand = (logId) => {
+	const toggleExpand = (logId: number) => {
 		setExpandedLogs(prev => {
 			const next = new Set(prev);
 			if (next.has(logId)) {
@@ -260,14 +262,17 @@ export default function Logs() {
 					</div>
 				) : (
 					<div className="divide-y divide-slate-100">
-						{logs.map((log, index) => (
-							<LogEntry
-								key={log.id || index}
-								log={log}
-								isExpanded={expandedLogs.has(log.id || index)}
-								onToggle={() => toggleExpand(log.id || index)}
-							/>
-						))}
+						{logs.map((log, index) => {
+							const logId = log.id || index;
+							return (
+								<LogEntry
+									key={logId}
+									log={log}
+									isExpanded={expandedLogs.has(logId)}
+									onToggle={() => toggleExpand(logId)}
+								/>
+							);
+						})}
 					</div>
 				)}
 			</div>

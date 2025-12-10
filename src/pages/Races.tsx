@@ -24,10 +24,11 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import type { RacesResponse, TracksResponse, Race, Track } from '@/types';
 
 export default function Races() {
-	const [races, setRaces] = useState([]);
-	const [tracks, setTracks] = useState([]);
+	const [races, setRaces] = useState<Race[]>([]);
+	const [tracks, setTracks] = useState<Track[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [startDate, setStartDate] = useState('');
 	const [endDate, setEndDate] = useState('');
@@ -35,8 +36,8 @@ export default function Races() {
 
 	const fetchTracks = async () => {
 		try {
-			const data = await api.get('/api/races/tracks');
-			setTracks(Array.isArray(data) ? data : data.tracks || []);
+			const data = await api.get<TracksResponse>('/api/races/tracks');
+			setTracks(data.success ? data.tracks : []);
 		} catch (error) {
 			// Tracks endpoint might not exist yet
 			setTracks([]);
@@ -54,8 +55,8 @@ export default function Races() {
 			const queryString = params.toString();
 			const url = queryString ? `/api/races?${queryString}` : '/api/races';
 
-			const data = await api.get(url);
-			setRaces(Array.isArray(data) ? data : data.races || []);
+			const data = await api.get<RacesResponse>(url);
+			setRaces(data.success ? data.races : []);
 		} catch (error) {
 			console.error('Failed to fetch races:', error);
 			setRaces([]);
@@ -76,41 +77,45 @@ export default function Races() {
 		{
 			header: 'Race ID',
 			accessor: 'id',
-			render: (value) => (
-				<span className="font-mono text-sm text-slate-600">{value?.substring?.(0, 8) || value}...</span>
+			render: (value: any) => (
+				<span className="font-mono text-sm text-slate-600">{value?.substring?.(0, 8) || value || '—'}...</span>
 			)
 		},
 		{
 			header: 'Date',
 			accessor: 'date',
-			render: (value) => value ? new Date(value).toLocaleDateString() : '—'
+			render: (value: any) => value ? new Date(value as string).toLocaleDateString() : '—'
 		},
 		{
 			header: 'Track',
 			accessor: 'trackCode',
-			render: (value, row) => (
-				<div className="flex items-center gap-2">
-					<div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center text-white text-xs font-bold">
-						{value?.substring?.(0, 2) || '—'}
+			render: (value: any, row: any) => {
+				const trackCode = value || row.track_code || '';
+				const trackName = row.trackName || row.track_name || '';
+				return (
+					<div className="flex items-center gap-2">
+						<div className="w-8 h-8 rounded-lg bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center text-white text-xs font-bold">
+							{trackCode?.substring?.(0, 2) || '—'}
+						</div>
+						<span className="font-medium">{trackName || trackCode || '—'}</span>
 					</div>
-					<span className="font-medium">{value || row.trackName || '—'}</span>
-				</div>
-			)
+				);
+			}
 		},
 		{
 			header: 'Race #',
 			accessor: 'raceNumber',
-			render: (value) => (
+			render: (value: any, row: any) => (
 				<Badge variant="outline" className="font-mono">
-					R{value || '—'}
+					R{value || row.race_number || '—'}
 				</Badge>
 			)
 		},
 		{
 			header: 'Status',
 			accessor: 'status',
-			render: (value) => {
-				const statusColors = {
+			render: (value: any) => {
+				const statusColors: Record<string, string> = {
 					completed: 'bg-emerald-100 text-emerald-700 border-emerald-200',
 					pending: 'bg-amber-100 text-amber-700 border-amber-200',
 					cancelled: 'bg-rose-100 text-rose-700 border-rose-200',
@@ -118,7 +123,7 @@ export default function Races() {
 				const color = statusColors[value?.toLowerCase?.()] || 'bg-slate-100 text-slate-700 border-slate-200';
 				return (
 					<Badge variant="outline" className={color}>
-						{value || 'Unknown'}
+						{value || 'Pending'}
 					</Badge>
 				);
 			}
@@ -126,7 +131,7 @@ export default function Races() {
 		{
 			header: 'Actions',
 			accessor: 'id',
-			render: (value) => (
+			render: (value: any) => (
 				<Link to={createPageUrl(`RaceDetail?id=${value}`)}>
 					<Button variant="ghost" size="sm" className="gap-2">
 						<Eye className="w-4 h-4" />
@@ -137,7 +142,7 @@ export default function Races() {
 		},
 	];
 
-	const setDatePreset = (days) => {
+	const setDatePreset = (days: number) => {
 		const end = new Date();
 		const start = new Date();
 		start.setDate(start.getDate() - days);
@@ -192,8 +197,8 @@ export default function Races() {
 								</SelectTrigger>
 								<SelectContent>
 									<SelectItem value="all">All Tracks</SelectItem>
-									{tracks.map((track) => (
-										<SelectItem key={track.id || track.code} value={track.id || track.code}>
+									{tracks.map((track: Track) => (
+										<SelectItem key={track.id || track.code} value={String(track.id || track.code)}>
 											{track.name || track.code}
 										</SelectItem>
 									))}
@@ -243,6 +248,8 @@ export default function Races() {
 					data={races}
 					isLoading={isLoading}
 					emptyMessage="No races found for the selected filters"
+					onRowClick={undefined}
+					pagination={undefined}
 				/>
 			)}
 		</div>

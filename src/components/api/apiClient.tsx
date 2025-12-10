@@ -19,19 +19,19 @@ function getApiKey(): string {
 export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   const apiKey = getApiKey();
 
-  const headers: HeadersInit = {
+  const headers: Record<string, string> = {
     'Content-Type': 'application/json',
-    ...(options.headers || {}),
+    ...(options.headers as Record<string, string> || {}),
   };
 
-  // Add API key to headers
+  // Add API key to headers (note: backend uses 'x-api-key' per API_SCHEMAS.md)
   if (apiKey) {
-    headers['X-API-Key'] = apiKey;
+    headers['x-api-key'] = apiKey;
   }
 
-  const config = {
+  const config: RequestInit = {
     ...options,
-    headers,
+    headers: headers as HeadersInit,
   };
 
   const url = `${API_BASE_URL}${endpoint}`;
@@ -63,27 +63,27 @@ export async function apiRequest(endpoint: string, options: RequestInit = {}) {
   return data;
 }
 
-// Convenience methods
+// Convenience methods with generic type support
 export const api = {
-  get: (endpoint: string, options: RequestInit = {}) =>
-    apiRequest(endpoint, { ...options, method: 'GET' }),
+  get: <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> =>
+    apiRequest(endpoint, { ...options, method: 'GET' }) as Promise<T>,
 
-  post: (endpoint: string, body: any, options: RequestInit = {}) =>
+  post: <T = any>(endpoint: string, body: any, options: RequestInit = {}): Promise<T> =>
     apiRequest(endpoint, {
       ...options,
       method: 'POST',
       body: JSON.stringify(body)
-    }),
+    }) as Promise<T>,
 
-  put: (endpoint: string, body: any, options: RequestInit = {}) =>
+  put: <T = any>(endpoint: string, body: any, options: RequestInit = {}): Promise<T> =>
     apiRequest(endpoint, {
       ...options,
       method: 'PUT',
       body: JSON.stringify(body)
-    }),
+    }) as Promise<T>,
 
-  delete: (endpoint: string, options: RequestInit = {}) =>
-    apiRequest(endpoint, { ...options, method: 'DELETE' }),
+  delete: <T = any>(endpoint: string, options: RequestInit = {}): Promise<T> =>
+    apiRequest(endpoint, { ...options, method: 'DELETE' }) as Promise<T>,
 };
 
 export default api;

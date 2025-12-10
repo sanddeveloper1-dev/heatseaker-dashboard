@@ -13,30 +13,36 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { HealthResponse, DatabaseHealthResponse, StatusValue } from '@/types';
 
 export default function Dashboard() {
-	const [healthData, setHealthData] = useState({ status: 'LOADING' });
-	const [dbHealthData, setDbHealthData] = useState({ status: 'LOADING' });
+	type HealthStatus = 'UP' | 'DOWN' | 'ERROR' | 'LOADING';
+	type HealthData = Omit<Partial<HealthResponse>, 'status'> & { status: HealthStatus };
+	type DbHealthData = Omit<Partial<DatabaseHealthResponse>, 'status'> & { status: HealthStatus };
+	const [healthData, setHealthData] = useState<HealthData>({ status: 'LOADING' });
+	const [dbHealthData, setDbHealthData] = useState<DbHealthData>({ status: 'LOADING' });
 	const [isRefreshing, setIsRefreshing] = useState(false);
-	const [lastUpdated, setLastUpdated] = useState(null);
+	const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
 	const fetchHealth = async () => {
 		setIsRefreshing(true);
 		try {
 			const [health, dbHealth] = await Promise.all([
-				api.get('/health').catch(err => ({ status: 'DOWN', message: err.message })),
-				api.get('/health/db').catch(err => ({ status: 'DOWN', message: err.message })),
+				api.get<HealthResponse>('/health').catch(err => ({ status: 'DOWN' as const, message: err.message || 'Health check failed', timestamp: new Date().toISOString(), version: '' })),
+				api.get<DatabaseHealthResponse>('/health/db').catch(err => ({ status: 'DOWN' as const, message: err.message || 'Database health check failed', timestamp: new Date().toISOString(), version: '' })),
 			]);
 
+			const healthStatus: HealthStatus = (health.status === 'UP' || (health as any).status === 'ok' || (health as any).healthy ? 'UP' : (health.status === 'DOWN' || health.status === 'ERROR' ? health.status : 'DOWN'));
 			setHealthData({
-				status: health.status === 'UP' || health.status === 'ok' || health.healthy ? 'UP' : 'DOWN',
+				status: healthStatus,
 				message: health.message || 'System operational',
 				timestamp: health.timestamp || new Date().toISOString(),
 				version: health.version,
 			});
 
+			const dbHealthStatus: HealthStatus = (dbHealth.status === 'UP' || (dbHealth as any).status === 'ok' || (dbHealth as any).connected ? 'UP' : (dbHealth.status === 'DOWN' || dbHealth.status === 'ERROR' ? dbHealth.status : 'DOWN'));
 			setDbHealthData({
-				status: dbHealth.status === 'UP' || dbHealth.status === 'ok' || dbHealth.connected ? 'UP' : 'DOWN',
+				status: dbHealthStatus,
 				message: dbHealth.message || 'Database connected',
 				timestamp: dbHealth.timestamp || new Date().toISOString(),
 			});
@@ -95,17 +101,18 @@ export default function Dashboard() {
 			<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 				<StatusCard
 					title="Application Health"
-					status={healthData.status}
+					status={healthData.status as StatusValue}
 					message={healthData.message}
 					timestamp={healthData.timestamp}
-					version={healthData.version}
+					version={healthData.version || ''}
 					icon={Activity}
 				/>
 				<StatusCard
 					title="Database Health"
-					status={dbHealthData.status}
+					status={dbHealthData.status as StatusValue}
 					message={dbHealthData.message}
 					timestamp={dbHealthData.timestamp}
+					version={dbHealthData.version || ''}
 					icon={Database}
 				/>
 			</div>

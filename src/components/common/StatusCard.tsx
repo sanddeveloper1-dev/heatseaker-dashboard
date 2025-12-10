@@ -2,8 +2,9 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { CheckCircle, XCircle, AlertTriangle, Loader2 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { StatusCardProps } from '@/types';
 
-const statusConfig = {
+const statusConfig: Record<string, { icon: typeof CheckCircle; color: string; bg: string; border: string; label: string }> = {
 	UP: {
 		icon: CheckCircle,
 		color: 'text-emerald-500',
@@ -42,7 +43,7 @@ export default function StatusCard({
 	version,
 	icon: CustomIcon,
 	className = ''
-}) {
+}: StatusCardProps) {
 	const config = statusConfig[status] || statusConfig.LOADING;
 	const Icon = CustomIcon || config.icon;
 	const isLoading = status === 'LOADING';
